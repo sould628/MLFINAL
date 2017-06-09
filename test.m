@@ -19,7 +19,6 @@ rawData.Properties.VariableNames(2)
 cat=categories(rawData.MSZoning)
 rawData.MSZoning(1)
 if rawData.MSZoning(1)==cat{4}
-    "here123"
 end
 % s=table;
 % s(:,1)=rawData(:,1);
