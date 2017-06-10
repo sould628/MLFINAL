@@ -13,7 +13,11 @@ function mlprojecttrain = importfile(filename, startRow, endRow)
 
 % MATLAB에서 다음 날짜에 자동 생성됨: 2017/06/09 19:25:20
 
+
 %% 변수를 초기화합니다.
+disp("Importing Data");
+drawnow;
+
 delimiter = ',';
 if nargin<=2
     startRow = 2;
@@ -50,7 +54,7 @@ for col=1:length(dataArray)-1
 end
 numericData = NaN(size(dataArray{1},1),size(dataArray,2));
 
-for col=[1,4,5,18,19,20,21,27,35,37,38,39,44,45,46,47,48,49,50,51,52,53,55,57,60,62,63,67,68,69,70,71,72,76,77,78,81]
+for col=[1,2, 4,5,18,19,20,21,27,35,37,38,39,44,45,46,47,48,49,50,51,52,53,55,57,60,62,63,67,68,69,70,71,72,76,77,78,81]
     % 입력 셀형 배열의 텍스트를 숫자로 변환합니다. 숫자형이 아닌 텍스트를 NaN으로 바꿨습니다.
     rawData = dataArray{col};
     for row=1:size(rawData, 1)
@@ -83,8 +87,8 @@ end
 
 
 %% 데이터를 숫자형 열과 string형 열로 분할합니다.
-rawNumericColumns = raw(:, [1,4,5,18,19,20,21,27,35,37,38,39,44,45,46,47,48,49,50,51,52,53,55,57,60,62,63,67,68,69,70,71,72,76,77,78,81]);
-rawStringColumns = string(raw(:, [2,3,6,7,8,9,10,11,12,13,14,15,16,17,22,23,24,25,26,28,29,30,31,32,33,34,36,40,41,42,43,54,56,58,59,61,64,65,66,73,74,75,79,80]));
+rawNumericColumns = raw(:, [1,2,4,5,18,19,20,21,27,35,37,38,39,44,45,46,47,48,49,50,51,52,53,55,57,60,62,63,67,68,69,70,71,72,76,77,78,81]);
+rawStringColumns = string(raw(:, [3,6,7,8,9,10,11,12,13,14,15,16,17,22,23,24,25,26,28,29,30,31,32,33,34,36,40,41,42,43,54,56,58,59,61,64,65,66,73,74,75,79,80]));
 
 
 %% 숫자형이 아닌 셀을 다음으로 바꾸기: NaN
@@ -92,7 +96,7 @@ R = cellfun(@(x) ~isnumeric(x) && ~islogical(x),rawNumericColumns); % 숫자형이 �
 rawNumericColumns(R) = {0}; % 숫자형이 아닌 셀 바꾸기
 
 %% <undefined>를 포함하는 텍스트가 <undefined> categorical형으로 제대로 변환되었는지 확인하십시오.
-for catIdx = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44]
+for catIdx = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43]
     idx = (rawStringColumns(:, catIdx) == "<undefined>");
     rawStringColumns(idx, catIdx) = "";
 end
@@ -100,84 +104,86 @@ end
 %% 출력 변수 만들기
 mlprojecttrain = table;
 mlprojecttrain.Id = cell2mat(rawNumericColumns(:, 1));
-mlprojecttrain.MSSubClass = categorical(rawStringColumns(:, 1));
-mlprojecttrain.MSZoning = categorical(rawStringColumns(:, 2));
-mlprojecttrain.LotFrontage = cell2mat(rawNumericColumns(:, 2));
-mlprojecttrain.LotArea = cell2mat(rawNumericColumns(:, 3));
-mlprojecttrain.Street = categorical(rawStringColumns(:, 3));
-mlprojecttrain.Alley = categorical(rawStringColumns(:, 4));
-mlprojecttrain.LotShape = categorical(rawStringColumns(:, 5));
-mlprojecttrain.LandContour = categorical(rawStringColumns(:, 6));
-mlprojecttrain.Utilities = categorical(rawStringColumns(:, 7));
-mlprojecttrain.LotConfig = categorical(rawStringColumns(:, 8));
-mlprojecttrain.LandSlope = categorical(rawStringColumns(:, 9));
-mlprojecttrain.Neighborhood = categorical(rawStringColumns(:, 10));
-mlprojecttrain.Condition1 = categorical(rawStringColumns(:, 11));
-mlprojecttrain.Condition2 = categorical(rawStringColumns(:, 12));
-mlprojecttrain.BldgType = categorical(rawStringColumns(:, 13));
-mlprojecttrain.HouseStyle = categorical(rawStringColumns(:, 14));
-mlprojecttrain.OverallQual = cell2mat(rawNumericColumns(:, 4));
-mlprojecttrain.OverallCond = cell2mat(rawNumericColumns(:, 5));
-mlprojecttrain.YearBuilt = cell2mat(rawNumericColumns(:, 6));
-mlprojecttrain.YearRemodAdd = cell2mat(rawNumericColumns(:, 7));
-mlprojecttrain.RoofStyle = categorical(rawStringColumns(:, 15));
-mlprojecttrain.RoofMatl = categorical(rawStringColumns(:, 16));
-mlprojecttrain.Exterior1st = categorical(rawStringColumns(:, 17));
-mlprojecttrain.Exterior2nd = categorical(rawStringColumns(:, 18));
-mlprojecttrain.MasVnrType = categorical(rawStringColumns(:, 19));
-mlprojecttrain.MasVnrArea = cell2mat(rawNumericColumns(:, 8));
-mlprojecttrain.ExterQual = categorical(rawStringColumns(:, 20));
-mlprojecttrain.ExterCond = categorical(rawStringColumns(:, 21));
-mlprojecttrain.Foundation = categorical(rawStringColumns(:, 22));
-mlprojecttrain.BsmtQual = categorical(rawStringColumns(:, 23));
-mlprojecttrain.BsmtCond = categorical(rawStringColumns(:, 24));
-mlprojecttrain.BsmtExposure = categorical(rawStringColumns(:, 25));
-mlprojecttrain.BsmtFinType1 = categorical(rawStringColumns(:, 26));
-mlprojecttrain.BsmtFinSF1 = cell2mat(rawNumericColumns(:, 9));
-mlprojecttrain.BsmtFinType2 = categorical(rawStringColumns(:, 27));
-mlprojecttrain.BsmtFinSF2 = cell2mat(rawNumericColumns(:, 10));
-mlprojecttrain.BsmtUnfSF = cell2mat(rawNumericColumns(:, 11));
-mlprojecttrain.TotalBsmtSF = cell2mat(rawNumericColumns(:, 12));
-mlprojecttrain.Heating = categorical(rawStringColumns(:, 28));
-mlprojecttrain.HeatingQC = categorical(rawStringColumns(:, 29));
-mlprojecttrain.CentralAir = categorical(rawStringColumns(:, 30));
-mlprojecttrain.Electrical = categorical(rawStringColumns(:, 31));
-mlprojecttrain.stFlrSF = cell2mat(rawNumericColumns(:, 13));
-mlprojecttrain.ndFlrSF = cell2mat(rawNumericColumns(:, 14));
-mlprojecttrain.LowQualFinSF = cell2mat(rawNumericColumns(:, 15));
-mlprojecttrain.GrLivArea = cell2mat(rawNumericColumns(:, 16));
-mlprojecttrain.BsmtFullBath = cell2mat(rawNumericColumns(:, 17));
-mlprojecttrain.BsmtHalfBath = cell2mat(rawNumericColumns(:, 18));
-mlprojecttrain.FullBath = cell2mat(rawNumericColumns(:, 19));
-mlprojecttrain.HalfBath = cell2mat(rawNumericColumns(:, 20));
-mlprojecttrain.BedroomAbvGr = cell2mat(rawNumericColumns(:, 21));
-mlprojecttrain.KitchenAbvGr = cell2mat(rawNumericColumns(:, 22));
-mlprojecttrain.KitchenQual = categorical(rawStringColumns(:, 32));
-mlprojecttrain.TotRmsAbvGrd = cell2mat(rawNumericColumns(:, 23));
-mlprojecttrain.Functional = categorical(rawStringColumns(:, 33));
-mlprojecttrain.Fireplaces = cell2mat(rawNumericColumns(:, 24));
-mlprojecttrain.FireplaceQu = categorical(rawStringColumns(:, 34));
-mlprojecttrain.GarageType = categorical(rawStringColumns(:, 35));
-mlprojecttrain.GarageYrBlt = cell2mat(rawNumericColumns(:, 25));
-mlprojecttrain.GarageFinish = categorical(rawStringColumns(:, 36));
-mlprojecttrain.GarageCars = cell2mat(rawNumericColumns(:, 26));
-mlprojecttrain.GarageArea = cell2mat(rawNumericColumns(:, 27));
-mlprojecttrain.GarageQual = categorical(rawStringColumns(:, 37));
-mlprojecttrain.GarageCond = categorical(rawStringColumns(:, 38));
-mlprojecttrain.PavedDrive = categorical(rawStringColumns(:, 39));
-mlprojecttrain.WoodDeckSF = cell2mat(rawNumericColumns(:, 28));
-mlprojecttrain.OpenPorchSF = cell2mat(rawNumericColumns(:, 29));
-mlprojecttrain.EnclosedPorch = cell2mat(rawNumericColumns(:, 30));
-mlprojecttrain.SsnPorch = cell2mat(rawNumericColumns(:, 31));
-mlprojecttrain.ScreenPorch = cell2mat(rawNumericColumns(:, 32));
-mlprojecttrain.PoolArea = cell2mat(rawNumericColumns(:, 33));
-mlprojecttrain.PoolQC = categorical(rawStringColumns(:, 40));
-mlprojecttrain.Fence = categorical(rawStringColumns(:, 41));
-mlprojecttrain.MiscFeature = categorical(rawStringColumns(:, 42));
-mlprojecttrain.MiscVal = cell2mat(rawNumericColumns(:, 34));
-mlprojecttrain.MoSold = cell2mat(rawNumericColumns(:, 35));
-mlprojecttrain.YrSold = cell2mat(rawNumericColumns(:, 36));
-mlprojecttrain.SaleType = categorical(rawStringColumns(:, 43));
-mlprojecttrain.SaleCondition = categorical(rawStringColumns(:, 44));
-mlprojecttrain.SalePrice = cell2mat(rawNumericColumns(:, 37));
+mlprojecttrain.MSSubClass = cell2mat(rawNumericColumns(:, 2));
+mlprojecttrain.MSZoning = categorical(rawStringColumns(:, 1));
+mlprojecttrain.LotFrontage = cell2mat(rawNumericColumns(:, 3));
+mlprojecttrain.LotArea = cell2mat(rawNumericColumns(:, 4));
+mlprojecttrain.Street = categorical(rawStringColumns(:, 2));
+mlprojecttrain.Alley = categorical(rawStringColumns(:, 3));
+mlprojecttrain.LotShape = categorical(rawStringColumns(:, 4));
+mlprojecttrain.LandContour = categorical(rawStringColumns(:, 5));
+mlprojecttrain.Utilities = categorical(rawStringColumns(:, 6));
+mlprojecttrain.LotConfig = categorical(rawStringColumns(:, 7));
+mlprojecttrain.LandSlope = categorical(rawStringColumns(:, 8));
+mlprojecttrain.Neighborhood = categorical(rawStringColumns(:, 9));
+mlprojecttrain.Condition1 = categorical(rawStringColumns(:, 10));
+mlprojecttrain.Condition2 = categorical(rawStringColumns(:, 11));
+mlprojecttrain.BldgType = categorical(rawStringColumns(:, 12));
+mlprojecttrain.HouseStyle = categorical(rawStringColumns(:, 13));
+mlprojecttrain.OverallQual = cell2mat(rawNumericColumns(:, 5));
+mlprojecttrain.OverallCond = cell2mat(rawNumericColumns(:, 6));
+mlprojecttrain.YearBuilt = cell2mat(rawNumericColumns(:, 7));
+mlprojecttrain.YearRemodAdd = cell2mat(rawNumericColumns(:, 8));
+mlprojecttrain.RoofStyle = categorical(rawStringColumns(:, 14));
+mlprojecttrain.RoofMatl = categorical(rawStringColumns(:, 15));
+mlprojecttrain.Exterior1st = categorical(rawStringColumns(:, 16));
+mlprojecttrain.Exterior2nd = categorical(rawStringColumns(:, 17));
+mlprojecttrain.MasVnrType = categorical(rawStringColumns(:, 18));
+mlprojecttrain.MasVnrArea = cell2mat(rawNumericColumns(:, 9));
+mlprojecttrain.ExterQual = categorical(rawStringColumns(:, 19));
+mlprojecttrain.ExterCond = categorical(rawStringColumns(:, 20));
+mlprojecttrain.Foundation = categorical(rawStringColumns(:, 21));
+mlprojecttrain.BsmtQual = categorical(rawStringColumns(:, 22));
+mlprojecttrain.BsmtCond = categorical(rawStringColumns(:, 23));
+mlprojecttrain.BsmtExposure = categorical(rawStringColumns(:, 24));
+mlprojecttrain.BsmtFinType1 = categorical(rawStringColumns(:, 25));
+mlprojecttrain.BsmtFinSF1 = cell2mat(rawNumericColumns(:, 10));
+mlprojecttrain.BsmtFinType2 = categorical(rawStringColumns(:, 26));
+mlprojecttrain.BsmtFinSF2 = cell2mat(rawNumericColumns(:, 11));
+mlprojecttrain.BsmtUnfSF = cell2mat(rawNumericColumns(:, 12));
+mlprojecttrain.TotalBsmtSF = cell2mat(rawNumericColumns(:, 13));
+mlprojecttrain.Heating = categorical(rawStringColumns(:, 27));
+mlprojecttrain.HeatingQC = categorical(rawStringColumns(:, 28));
+mlprojecttrain.CentralAir = categorical(rawStringColumns(:, 29));
+mlprojecttrain.Electrical = categorical(rawStringColumns(:, 30));
+mlprojecttrain.stFlrSF = cell2mat(rawNumericColumns(:, 14));
+mlprojecttrain.ndFlrSF = cell2mat(rawNumericColumns(:, 15));
+mlprojecttrain.LowQualFinSF = cell2mat(rawNumericColumns(:, 16));
+mlprojecttrain.GrLivArea = cell2mat(rawNumericColumns(:, 17));
+mlprojecttrain.BsmtFullBath = cell2mat(rawNumericColumns(:, 18));
+mlprojecttrain.BsmtHalfBath = cell2mat(rawNumericColumns(:, 19));
+mlprojecttrain.FullBath = cell2mat(rawNumericColumns(:, 20));
+mlprojecttrain.HalfBath = cell2mat(rawNumericColumns(:, 21));
+mlprojecttrain.BedroomAbvGr = cell2mat(rawNumericColumns(:, 22));
+mlprojecttrain.KitchenAbvGr = cell2mat(rawNumericColumns(:, 23));
+mlprojecttrain.KitchenQual = categorical(rawStringColumns(:, 31));
+mlprojecttrain.TotRmsAbvGrd = cell2mat(rawNumericColumns(:, 24));
+mlprojecttrain.Functional = categorical(rawStringColumns(:, 32));
+mlprojecttrain.Fireplaces = cell2mat(rawNumericColumns(:, 25));
+mlprojecttrain.FireplaceQu = categorical(rawStringColumns(:, 33));
+mlprojecttrain.GarageType = categorical(rawStringColumns(:, 34));
+mlprojecttrain.GarageYrBlt = cell2mat(rawNumericColumns(:, 26));
+mlprojecttrain.GarageFinish = categorical(rawStringColumns(:, 35));
+mlprojecttrain.GarageCars = cell2mat(rawNumericColumns(:, 27));
+mlprojecttrain.GarageArea = cell2mat(rawNumericColumns(:, 28));
+mlprojecttrain.GarageQual = categorical(rawStringColumns(:, 36));
+mlprojecttrain.GarageCond = categorical(rawStringColumns(:, 37));
+mlprojecttrain.PavedDrive = categorical(rawStringColumns(:, 38));
+mlprojecttrain.WoodDeckSF = cell2mat(rawNumericColumns(:, 29));
+mlprojecttrain.OpenPorchSF = cell2mat(rawNumericColumns(:, 30));
+mlprojecttrain.EnclosedPorch = cell2mat(rawNumericColumns(:, 31));
+mlprojecttrain.SsnPorch = cell2mat(rawNumericColumns(:, 32));
+mlprojecttrain.ScreenPorch = cell2mat(rawNumericColumns(:, 33));
+mlprojecttrain.PoolArea = cell2mat(rawNumericColumns(:, 34));
+mlprojecttrain.PoolQC = categorical(rawStringColumns(:, 39));
+mlprojecttrain.Fence = categorical(rawStringColumns(:, 40));
+mlprojecttrain.MiscFeature = categorical(rawStringColumns(:, 41));
+mlprojecttrain.MiscVal = cell2mat(rawNumericColumns(:, 35));
+mlprojecttrain.MoSold = cell2mat(rawNumericColumns(:, 36));
+mlprojecttrain.YrSold = cell2mat(rawNumericColumns(:, 37));
+mlprojecttrain.SaleType = categorical(rawStringColumns(:, 42));
+mlprojecttrain.SaleCondition = categorical(rawStringColumns(:, 43));
+mlprojecttrain.SalePrice = cell2mat(rawNumericColumns(:, 38));
 
+disp("Importing Done");
+drawnow;

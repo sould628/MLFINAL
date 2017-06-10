@@ -2,13 +2,16 @@ classdef AMES
     %AMESDATA 이 클래스의 요약 설명 위치
     %   자세한 설명 위치
     properties
-        compressedData
+        compressedMat
         data
         discrete
         ordinal
         nominal
         continuous
         raw
+        dataMatrix
+        salePrice
+        salePriceB
     end
     properties
         rawR
@@ -21,6 +24,8 @@ classdef AMES
     
     methods
         function obj=AMES(rawData)
+            disp("DataProcessing");
+            drawnow;
             %%%Initialize Class Variables
             [obj.rawR, obj.rawC]=size(rawData);
             obj.data=table;
@@ -30,8 +35,9 @@ classdef AMES
             obj.discrete={};
             obj.ordinal={};
             j=1;
-            i=1;
+            i=2;
             while (i<=obj.rawC)
+                prcoess=i/obj.rawC
                 dim=1;
                 varName=rawData.Properties.VariableNames{i};
                 %%Nominal: 1, 2, 5, 6, 10, 12, 13, 14, 15, 20
@@ -114,7 +120,7 @@ classdef AMES
                 elseif strcmp(varName,'LotShape') %7
                     result=my_ordinal(obj.raw.LotShape, {'IR3', 'IR2', 'IR1', 'Reg'}, 'LotShape');
                     obj.data=[obj.data result];
-                    obj.ordinal=[obj.ordinal; j];  
+                    obj.ordinal=[obj.ordinal; j];
                 elseif strcmp(varName,'LandContour') %8
                     result=my_ordinal(obj.raw.LandContour, {'Low', 'HLS', 'Bnk', 'Lvl'}, 'LandContour');
                     obj.data=[obj.data result];
@@ -238,7 +244,27 @@ classdef AMES
                 j=j+dim;
                 i=i+1;
             end
-            disp("here")
+            
+            %Matrix Form Data
+            obj.dataMatrix=table2array(obj.data);
+            col=size(obj.dataMatrix, 2);
+            obj.salePrice=obj.dataMatrix(:,col);
+            obj.dataMatrix=obj.dataMatrix(:,1:col-1);
+            %Sale Price Binary
+            obj.salePriceB=double(obj.salePrice>=160000);
+            
+            %Data Standardization
+            meanVec=mean(obj.dataMatrix);
+            compressedMat=obj.dataMatrix-meanVec;
+            maxVec=max(compressedMat);
+            minVec=min(compressedMat);
+            maxminusminVec=maxVec-minVec;
+            compressedMat=(compressedMat-minVec)./maxminusminVec;
+            range=2;
+            obj.compressedMat=compressedMat.*range-1;
+            
+            disp("Processing Done");
+            drawnow;
         end
         
         
