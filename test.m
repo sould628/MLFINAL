@@ -1,17 +1,7 @@
 filename='ml_project_train.csv';
 
-i=0;
-temp=whos;
-for i=1:size(whos)
-    if strcmp(temp(i).name, 'rawData')
-        break
-    elseif [i 1]==size(whos)         %#ok<BDSCA>
-        rawData=importfile(filename);
-    end
-end
-
-i=0;
-temp=whos;
+   
+rawData=importfile(filename);
 
 myData=AMES(rawData);
 

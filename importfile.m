@@ -89,7 +89,7 @@ rawStringColumns = string(raw(:, [2,3,6,7,8,9,10,11,12,13,14,15,16,17,22,23,24,2
 
 %% 숫자형이 아닌 셀을 다음으로 바꾸기: NaN
 R = cellfun(@(x) ~isnumeric(x) && ~islogical(x),rawNumericColumns); % 숫자형이 아닌 셀 찾기
-rawNumericColumns(R) = {NaN}; % 숫자형이 아닌 셀 바꾸기
+rawNumericColumns(R) = {0}; % 숫자형이 아닌 셀 바꾸기
 
 %% <undefined>를 포함하는 텍스트가 <undefined> categorical형으로 제대로 변환되었는지 확인하십시오.
 for catIdx = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44]
