@@ -98,7 +98,7 @@ for epoch = 1: numEpochIterations
     TargetEval = Evaluate(Samples, Weights, Biases);
     %MSE = MeasureError(Samples, TargetValues, Weights, Biases);
     diff = (TargetValues - TargetEval);
-    display(['Epochs = ' num2str(epoch) ', MSE = ' num2str(sqrt(sum(diff.*diff))/numSamples)]);
+    display(['Epochs = ' num2str(epoch) ', MSE = ' num2str(sum(diff.*diff)/numSamples)]);
 end
     
     
