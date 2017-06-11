@@ -1,8 +1,8 @@
-function [ result, j ] = my_one_hot_sp( input, input2, attribName )
+function [ result, j ] = my_one_hot_sp( input, input2, cat, attribName )
 %MY_ONE_HOT_SP 이 함수의 요약 설명 위치
 %   자세한 설명 위치
 
-cat=categories(input);
+%cat=categories(input);
 j=size(cat,1 );
 rawR=size(input,1);
 result=zeros(rawR, j);

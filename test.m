@@ -1,16 +1,32 @@
 filename='ml_project_train.csv';
-
 %%Constant Variables
 PCADIMENSION=40;
 NUMKFOLDS=10;
 
-%% DataProcessing
-if dataprocess==1
-%%%ImportData
-%rawData=importfile(filename);
-%%%ProcessData
 
-myData=AMES(rawData);
+%%Initialize
+if initialize==true
+    dataprocess=1;
+    dimreduction=1;
+    kfold=1;
+    doKnn=true;
+    doTree=false;
+    initialize=0;
+end
+
+%% DataProcessing
+if dataprocess==true
+    %%%ImportData
+    %rawData=importfile(filename);
+    %rawTest=importfile(testfile);
+    %%%ProcessData
+    %myData=AMES(rawData);
+    myData.dataMatrix=myData.postProcess(myData.zeroList);
+    myData.compressedMat=myData.standardize;
+    %myTest=AMES(rawTest);
+    myTest.dataMatrix=myTest.postProcess(myData.zeroList);
+    myTest.compressedMat=myTest.standardize;
+    dataprocess=0;
 end
 
 compressedMat=myData.compressedMat;
@@ -19,96 +35,133 @@ dataPrice=myData.salePrice;
 
 %% DimensionReduction
 % Data Standardization
-if dimreduction==1
+if dimreduction==true
     disp("performing dimension reduction");
     drawnow;
-%PCA
-pcaCoeff=pca(compressedMat);
-pcaCoeff=pcaCoeff(:,1:PCADIMENSION);
-reducedMat=compressedMat*pcaCoeff;
+    %PCA
+    pcaCoeff=pca(compressedMat);
+    pcaCoeff=pcaCoeff(:,1:PCADIMENSION);
+    reducedMat=compressedMat*pcaCoeff;
+    dimreduction=0;
 end
 %% Make Training and Test Set for K-Fold Cross-Validation
-if kfold==1
-disp("Making K-Fold Cross-Validation Set kfold_part");
-drawnow;
-kfold_part={};
-numData_in_partition=size(compressedMat,1)/NUMKFOLDS;
-for i=1:NUMKFOLDS
-    if i==1
-        trainingd=compressedMat(i*numData_in_partition+1:NUMKFOLDS*numData_in_partition, :);
-        testd=compressedMat(0*numData_in_partition+1:1*numData_in_partition, :);
+if kfold==true
+    kfold=0;
+    disp("Making K-Fold Cross-Validation Set kfold_part");
+    drawnow;
+    kfold_part={};
+    numData_in_partition=size(compressedMat,1)/NUMKFOLDS;
+    for i=1:NUMKFOLDS
+        if i==1
+            trainingd=compressedMat(i*numData_in_partition+1:NUMKFOLDS*numData_in_partition, :);
+            testd=compressedMat(0*numData_in_partition+1:1*numData_in_partition, :);
+            
+            trainingl=dataLabel(i*numData_in_partition+1:NUMKFOLDS*numData_in_partition, :);
+            testl=dataLabel(0*numData_in_partition+1:1*numData_in_partition, :);
+            
+            trainingp=dataPrice(i*numData_in_partition+1:NUMKFOLDS*numData_in_partition, :);
+            testp=dataPrice(0*numData_in_partition+1:1*numData_in_partition, :);
+        elseif i~=NUMKFOLDS
+            trainingd=compressedMat(0*numData_in_partition+1:(i-1)*numData_in_partition, :);
+            testd=compressedMat((i-1)*numData_in_partition+1:i*numData_in_partition, :);
+            trainingd=[trainingd; compressedMat(i*numData_in_partition+1:NUMKFOLDS*numData_in_partition, :)];
+            
+            trainingl=dataLabel(0*numData_in_partition+1:(i-1)*numData_in_partition, :);
+            testl=dataLabel((i-1)*numData_in_partition+1:i*numData_in_partition, :);
+            trainingl=[trainingl; dataLabel(i*numData_in_partition+1:NUMKFOLDS*numData_in_partition, :)];
+            
+            trainingp=dataPrice(0*numData_in_partition+1:(i-1)*numData_in_partition, :);
+            testp=dataPrice((i-1)*numData_in_partition+1:i*numData_in_partition, :);
+            trainingp=[trainingl; dataPrice(i*numData_in_partition+1:NUMKFOLDS*numData_in_partition, :)];
+        else
+            trainingd=compressedMat(0*numData_in_partition+1:(NUMKFOLDS-1)*numData_in_partition, :);
+            testd=compressedMat((NUMKFOLDS-1)*numData_in_partition+1:NUMKFOLDS*numData_in_partition, :);
+            
+            trainingl=dataLabel(0*numData_in_partition+1:(NUMKFOLDS-1)*numData_in_partition, :);
+            testl=dataLabel((NUMKFOLDS-1)*numData_in_partition+1:NUMKFOLDS*numData_in_partition, :);
+            
+            trainingp=dataPrice(0*numData_in_partition+1:(NUMKFOLDS-1)*numData_in_partition, :);
+            testp=dataPrice((NUMKFOLDS-1)*numData_in_partition+1:NUMKFOLDS*numData_in_partition, :);
+        end
         
-        trainingl=dataLabel(i*numData_in_partition+1:NUMKFOLDS*numData_in_partition, :);
-        testl=dataLabel(0*numData_in_partition+1:1*numData_in_partition, :);
-        
-        trainingp=dataPrice(i*numData_in_partition+1:NUMKFOLDS*numData_in_partition, :);
-        testp=dataPrice(0*numData_in_partition+1:1*numData_in_partition, :);
-    elseif i~=NUMKFOLDS
-        trainingd=compressedMat(0*numData_in_partition+1:(i-1)*numData_in_partition, :);
-        testd=compressedMat((i-1)*numData_in_partition+1:i*numData_in_partition, :);
-        trainingd=[trainingd; compressedMat(i*numData_in_partition+1:NUMKFOLDS*numData_in_partition, :)];
-        
-        trainingl=dataLabel(0*numData_in_partition+1:(i-1)*numData_in_partition, :);
-        testl=dataLabel((i-1)*numData_in_partition+1:i*numData_in_partition, :);
-        trainingl=[trainingl; dataLabel(i*numData_in_partition+1:NUMKFOLDS*numData_in_partition, :)];
-        
-        trainingp=dataPrice(0*numData_in_partition+1:(i-1)*numData_in_partition, :);
-        testp=dataPrice((i-1)*numData_in_partition+1:i*numData_in_partition, :);
-        trainingp=[trainingl; dataPrice(i*numData_in_partition+1:NUMKFOLDS*numData_in_partition, :)];
-    else
-        trainingd=compressedMat(0*numData_in_partition+1:(NUMKFOLDS-1)*numData_in_partition, :);
-        testd=compressedMat((NUMKFOLDS-1)*numData_in_partition+1:NUMKFOLDS*numData_in_partition, :);
-        
-        trainingl=dataLabel(0*numData_in_partition+1:(NUMKFOLDS-1)*numData_in_partition, :);
-        testl=dataLabel((NUMKFOLDS-1)*numData_in_partition+1:NUMKFOLDS*numData_in_partition, :);
-        
-        trainingp=dataPrice(0*numData_in_partition+1:(NUMKFOLDS-1)*numData_in_partition, :);
-        testp=dataPrice((NUMKFOLDS-1)*numData_in_partition+1:NUMKFOLDS*numData_in_partition, :);
+        kfold_part{i,1}=trainingd;
+        kfold_part{i,2}=trainingp;
+        kfold_part{i,3}=trainingl;
+        kfold_part{i,4}=testd;
+        kfold_part{i,5}=testp;
+        kfold_part{i,6}=testl;
+    end
+end
+
+%% MODE1 CrossValidationMode
+if MODE==1
+    %% Regression
+    
+    
+    %% BinaryClassification
+    if doKnn==true
+        %knn classifier
+        myknn={};
+        for i=1:NUMKFOLDS
+            originalWorkingFold=i
+            myknn{i,1}=myKnnClassifier(kfold_part{i,1}, kfold_part{i,2}, kfold_part{i,3}, kfold_part{i,4}, kfold_part{i,5}, kfold_part{i,6}, 5);
+        end
+        myknnDR={};
+        for i=1:NUMKFOLDS
+            reducedWorkingFold=i
+            pcaCoeff=pca(kfold_part{i,1});
+            reducedTrainSet=doPCAreduction(kfold_part{i,1}, pcaCoeff, PCADIMENSION);
+            reducedTestSet=doPCAreduction(kfold_part{i,4}, pcaCoeff, PCADIMENSION);
+            myknnDR{i,1}=myKnnClassifier(reducedTrainSet, kfold_part{i,2}, kfold_part{i,3}, reducedTestSet, kfold_part{i,5}, kfold_part{i,6}, 5);
+        end
+        averagePrecision=0;
+        averagePrecisionDR=0;
+        for i=1:NUMKFOLDS
+            fprintf("%d validation set\n", i);
+            averagePrecision=averagePrecision+myknn{i,1}.classifierPrecision;
+            averagePrecisionDR=averagePrecisionDR+myknnDR{i,1}.classifierPrecision;
+            myknn{i,1}.showResult;
+            myknnDR{i,1}.showResult;
+        end
+        averagePrecision=averagePrecision/NUMKFOLDS
+        averagePrecisionDR=averagePrecisionDR/NUMKFOLDS
+    end
+    %tree classifier
+    if doTree==true
+        disp("doing tree classifier");
+        drawnow;
+        tc=myTreeClassifier(myData);
+        tc.getEntropy(1);
+        disp("stop");
     end
     
-    kfold_part{i,1}=trainingd;
-    kfold_part{i,2}=trainingp;
-    kfold_part{i,3}=trainingl;
-    kfold_part{i,4}=testd;
-    kfold_part{i,5}=testp;
-    kfold_part{i,6}=testl;
+    if false
+        rawData.Properties.VariableNames(2)
+        cat=categories(rawData.MSZoning)
+        rawData.MSZoning(1)
+        if rawData.MSZoning(1)==cat{4}
+        end
+    end
 end
-end
-%% Regression
+    %% MODE=2 (With Test Sets)
+if MODE==2
 
+    
+    compressedTest=myTest.compressedMat;
+    testLabel=myTest.salePriceB;
+    testPrice=myTest.salePrice;
+    
+    %%%knn
+    if doKnn==true
+        myknnwTD=myKnnClassifier(compressedMat, dataPrice, dataLabel, compressedTest, testPrice, testLabel, 5);
 
-%% BinaryClassification
-if classifiermode==2
-%knn classifier
-myknn={};
-for i=1:NUMKFOLDS
-    workingFold=i
-    myknn{i,1}=myKnnClassifier(kfold_part{i,1}, kfold_part{i,2}, kfold_part{i,3}, kfold_part{i,4}, kfold_part{i,5}, kfold_part{i,6}, 5);
-end
-myknnDR={};
-for i=1:NUMKFOLDS
-    workingFold=i
-    pcaCoeff=pca(kfold_part{i,1});
-    reducedTrainSet=doPCAreduction(kfold_part{i,1}, pcaCoeff, PCADIMENSION);
-    reducedTestSet=doPCAreduction(kfold_part{i,4}, pcaCoeff, PCADIMENSION);
-    myknnDR{i,1}=myKnnClassifier(reducedTrainSet, kfold_part{i,2}, kfold_part{i,3}, reducedTestSet, kfold_part{i,5}, kfold_part{i,6}, 5);
-end
-end
-%tree classifier
-if classifiermode==3
-    disp("doing tree classifier");
-    drawnow;
-    tc=myTreeClassifier(myData);
-    tc.getEntropy(1);
-    disp("stop");
-end
+        pcaCoeff=pca(compressedMat);
+        reducedTrainSet=doPCAreduction(compressedMat, pcaCoeff, PCADIMENSION);
+        reducedTestSet=doPCAreduction(compressedTest, pcaCoeff, PCADIMENSION);
+        myknnDRwTD=myKnnClassifier(reducedTrainSet, dataPrice, dataLabel, reducedTestSet, testPrice, testLabel, 5);
 
-rawData.Properties.VariableNames(2)
-cat=categories(rawData.MSZoning)
-rawData.MSZoning(1)
-if rawData.MSZoning(1)==cat{4}
+        myknnwTD.showResult;
+        myknnDRwTD.showResult;
+    end
+    
 end
-% s=table;
-% s(:,1)=rawData(:,1);
-% s.Properties.VariableNames(1)=rawData.Properties.VariableNames(1);
-% s(:,2)=rawData(:,2);

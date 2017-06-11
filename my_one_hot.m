@@ -1,9 +1,9 @@
-function [ result, j ] = my_one_hot( input, attribName )
+function [ result, j ] = my_one_hot( input, cat, attribName )
 %MY_ONE_HOT 이 함수의 요약 설명 위치
 %   자세한 설명 위치
 %One-Hot Encoding
 
-cat=categories(input);
+%cat=categories(input);
 j=size(cat,1 ); %#ok<ASGLU>
 rawR=size(input,1);
 result=zeros(rawR, j);
@@ -30,6 +30,9 @@ for z=1:j
     end
     if contains(varname, '.')
         varname=strrep(varname, '.', '_');
+    end
+    if contains(varname, '&')
+        varname=strrep(varname, '&', '_');
     end
     result.Properties.VariableNames(z)=cellstr(varname);
 end
