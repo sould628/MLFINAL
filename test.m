@@ -7,7 +7,7 @@ NUMKFOLDS=10;
 %% DataProcessing
 if dataprocess==1
 %%%ImportData
-rawData=importfile(filename);
+%rawData=importfile(filename);
 %%%ProcessData
 
 myData=AMES(rawData);

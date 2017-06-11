@@ -41,7 +41,11 @@ classdef AMES
                 dim=1;
                 varName=rawData.Properties.VariableNames{i};
                 %%Nominal: 1, 2, 5, 6, 10, 12, 13, 14, 15, 20
-                if strcmp(varName,'MSZoning')  %2 (5)
+                if strcmp(varName,'MSSubClass')  %2 (5)
+                    [result, dim]=my_one_hot(obj.raw.MSSubClass, 'MSSubClass');
+                    obj.data=[obj.data result];
+                    obj.nominal=[obj.nominal; [j,j+dim-1]];
+                elseif strcmp(varName,'MSZoning')  %2 (5)
                     [result, dim]=my_one_hot(obj.raw.MSZoning, 'MSZoning');
                     obj.data=[obj.data result];
                     obj.nominal=[obj.nominal; [j,j+dim-1]];
