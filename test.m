@@ -2,7 +2,7 @@ filename='ml_project_train.csv';
 %%Constant Variables
 PCADIMENSION=40;
 NUMKFOLDS=10;
-
+NUMBOOTSAMPLE=1000;
 
 %%Initialize
 if initialize==true
@@ -17,13 +17,13 @@ end
 %% DataProcessing
 if dataprocess==true
     %%%ImportData
-    %rawData=importfile(filename);
-    %rawTest=importfile(testfile);
+    rawData=importfile(filename);
+    rawTest=importfile(testfile);
     %%%ProcessData
-    %myData=AMES(rawData);
+    myData=AMES(rawData);
     myData.dataMatrix=myData.postProcess(myData.zeroList);
     myData.compressedMat=myData.standardize;
-    %myTest=AMES(rawTest);
+    myTest=AMES(rawTest);
     myTest.dataMatrix=myTest.postProcess(myData.zeroList);
     myTest.compressedMat=myTest.standardize;
     dataprocess=0;
@@ -46,12 +46,13 @@ if dimreduction==true
 end
 %% Make Training and Test Set for K-Fold Cross-Validation
 if kfold==true
-    kfold=0;
     disp("Making K-Fold Cross-Validation Set kfold_part");
     drawnow;
     kfold_part={};
+    bootSample=cell(NUMKFOLDS, 1);
     numData_in_partition=size(compressedMat,1)/NUMKFOLDS;
     for i=1:NUMKFOLDS
+        kfold_bootstrap_process=i/NUMKFOLDS
         if i==1
             trainingd=compressedMat(i*numData_in_partition+1:NUMKFOLDS*numData_in_partition, :);
             testd=compressedMat(0*numData_in_partition+1:1*numData_in_partition, :);
@@ -90,23 +91,31 @@ if kfold==true
         kfold_part{i,4}=testd;
         kfold_part{i,5}=testp;
         kfold_part{i,6}=testl;
+        %make BootStrap
+        bootSample{i,1}=mybootstrap(trainingd, trainingp, trainingl, NUMBOOTSAMPLE);
     end
+    kfold=0;
 end
+
+
+
 
 %% MODE1 CrossValidationMode
 if MODE==1
+    
+    
     %% Regression
     
     
     %% BinaryClassification
     if doKnn==true
         %knn classifier
-        myknn={};
+        myknn=cell(NUMKFOLDS, 1);
         for i=1:NUMKFOLDS
             originalWorkingFold=i
             myknn{i,1}=myKnnClassifier(kfold_part{i,1}, kfold_part{i,2}, kfold_part{i,3}, kfold_part{i,4}, kfold_part{i,5}, kfold_part{i,6}, 5);
         end
-        myknnDR={};
+        myknnDR=cell(NUMKFOLDS, 1);
         for i=1:NUMKFOLDS
             reducedWorkingFold=i
             pcaCoeff=pca(kfold_part{i,1});
@@ -125,6 +134,7 @@ if MODE==1
         end
         averagePrecision=averagePrecision/NUMKFOLDS
         averagePrecisionDR=averagePrecisionDR/NUMKFOLDS
+        
     end
     %tree classifier
     if doTree==true
@@ -143,23 +153,28 @@ if MODE==1
         end
     end
 end
-    %% MODE=2 (With Test Sets)
+%% MODE=2 (With Test Sets)
 if MODE==2
-
+    %remove zeros from
     
-    compressedTest=myTest.compressedMat;
+    zeroList=myTest.zeroList&myData.zeroList;
+    myTest.dataMatrix=myTest.postProcess(zeroList);
+    myData.dataMatrix=myData.postProcess(zeroList);
+    compressedTest=myTest.standardize;
+    compressedMat=myData.standardize;
+    %compressedTest=myTest.compressedMat;
     testLabel=myTest.salePriceB;
     testPrice=myTest.salePrice;
     
     %%%knn
     if doKnn==true
         myknnwTD=myKnnClassifier(compressedMat, dataPrice, dataLabel, compressedTest, testPrice, testLabel, 5);
-
+        
         pcaCoeff=pca(compressedMat);
         reducedTrainSet=doPCAreduction(compressedMat, pcaCoeff, PCADIMENSION);
         reducedTestSet=doPCAreduction(compressedTest, pcaCoeff, PCADIMENSION);
         myknnDRwTD=myKnnClassifier(reducedTrainSet, dataPrice, dataLabel, reducedTestSet, testPrice, testLabel, 5);
-
+        
         myknnwTD.showResult;
         myknnDRwTD.showResult;
     end

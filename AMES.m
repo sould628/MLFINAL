@@ -306,11 +306,6 @@ classdef AMES
             minVec=min(compressedMat);
             maxminusminVec=maxVec-minVec;
             numAttrib=size(maxminusminVec,2);
-            for i=1:numAttrib
-                if maxminusminVec(1,i)==0
-                    maxminusminVec(1,i)=1;
-                end
-            end
             
             compressedMat=(compressedMat-minVec)./maxminusminVec;
             range=2;
