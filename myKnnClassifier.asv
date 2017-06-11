@@ -27,11 +27,12 @@ classdef myKnnClassifier
                 end
                 modeval=mode(nearestNeighbor);
                 obj.classfierResult(i, 1)=modeval(1,4);
-                meaneval=mean(nearestNeighbor);
-                obj.regressionResult(i,1)=meaneval(1,3);
+                for j=1:k
+                    obj.regressionResult(i,1)=mean(nearestNeighbor, 3);
+
             end
             
-            obj.regressionMSE=norm(obj.regressionResult-testPrice)/testrow;
+            obj.regressionMSE=norm(obj.regressionResult-testPrice);
             
             numCorrect=0;
             for i=1:testrow
