@@ -316,3 +316,103 @@ classdef AMES
 
 end
 
+function result= my_ordinal( input, valueset, attribName )
+%MY_ORDINAL 이 함수의 요약 설명 위치
+%   자세한 설명 위치
+rawR=size(input,1);
+result=zeros(rawR, 1);
+for i=1:length(valueset)
+    for j=1:rawR
+        if strcmp(valueset(i), char(input(j,1)))
+            result(j)=i-1;
+        end
+    end
+end
+result=array2table(result);
+result.Properties.VariableNames(1)=cellstr(attribName);
+
+end
+
+
+function [ result, j ] = my_one_hot( input, cat, attribName )
+%MY_ONE_HOT 이 함수의 요약 설명 위치
+%   자세한 설명 위치
+%One-Hot Encoding
+
+%cat=categories(input);
+j=size(cat,1 ); %#ok<ASGLU>
+rawR=size(input,1);
+result=zeros(rawR, j);
+for k=1:rawR
+    for z=1:j
+        if strcmp(char(input(k,1)), cat{z})
+            result(k, z)=1;
+            break;
+        else
+        end
+    end
+end
+result=array2table(result);
+for z=1:j
+    varname=strcat(attribName,"_",char(cat{z}));
+    if contains(varname, '(')
+        varname=strrep(varname, '(', '_');
+    end
+    if contains(varname, ')')
+        varname=strrep(varname, ')', '_');
+    end
+    if contains(varname, '_')
+        varname=strrep(varname, ' ', '_');
+    end
+    if contains(varname, '.')
+        varname=strrep(varname, '.', '_');
+    end
+    if contains(varname, '&')
+        varname=strrep(varname, '&', '_');
+    end
+    result.Properties.VariableNames(z)=cellstr(varname);
+end
+
+end
+
+function [ result, j ] = my_one_hot_sp( input, input2, cat, attribName )
+%MY_ONE_HOT_SP 이 함수의 요약 설명 위치
+%   자세한 설명 위치
+
+%cat=categories(input);
+j=size(cat,1 );
+rawR=size(input,1);
+result=zeros(rawR, j);
+for k=1:rawR
+    for z=1:j
+        if strcmp(char(input(k,1)), cat{z})
+            result(k, z)=1;
+        end
+        if strcmp(char(input2(k,1)), cat{z})
+            result(k, z)=1;    
+        else
+        end
+    end
+end
+result=array2table(result);
+for z=1:j
+    varname=strcat(attribName,"_",char(cat{z}));
+        varname=strcat(attribName,"_",char(cat{z}));
+    if contains(varname, '(')
+        varname=strrep(varname, '(', '_');
+    end
+    if contains(varname, ')')
+        varname=strrep(varname, ')', '_');
+    end
+    if contains(varname, '_')
+        varname=strrep(varname, ' ', '_');
+    end
+    if contains(varname, '.')
+        varname=strrep(varname, '.', '_');
+    end   
+    result.Properties.VariableNames(z)=cellstr(varname);
+end
+
+end
+
+

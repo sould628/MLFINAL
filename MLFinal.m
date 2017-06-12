@@ -136,11 +136,31 @@ if MODE==1
             myknnDR{i,1}.showResult;
         end
         averagePrecision=averagePrecision/NUMKFOLDS
-        averagePrecisionDR=averagePrecisionDR/NUMKFOLDS    
+        averagePrecisionDR=averagePrecisionDR/NUMKFOLDS
     end
     if doKnnEnsemble==true
-        for i=1:NUM
+        forestResult=zeros(numData_in_partition, NUMKFOLDS);
+        precisionWithBootSample=zeros(1,NUMKFOLDS);
+        for i=1:NUMKFOLDS
+            forest=zeros(numData_in_partition, NUMBOOTSAMPLE);
+            for j=1:NUMBOOTSAMPLE
+                bootsampleprocess=i+j/NUMBOOTSAMPLE
+                reduceTest=reduceattrib2bootattrib(kfold_part{i,4}, bootSample{i,1}{j,4});
+                result=myKnnClassifier(bootSample{i,1}{j,1}, bootSample{i,1}{j,2}, bootSample{i,1}{j,3}, reduceTest, kfold_part{i,5}, kfold_part{i,6},5);
+                forest(:,j)=result.classfierResult;
+            end
+            forestResult(:,i)=mode(forest,2);
+            %Validate
+            numCorrect=0;
+            for j=1:numData_in_partition
+                if forestResult(j,i)==kfold_part{i,6}(j,1)
+                    numCorrect=numCorrect+1;
+                end
+            end
+            precisionWithBootSample(1,i)=numCorrect/numData_in_partition;
         end
+        
+        
     end
     
     %tree classifier
@@ -187,3 +207,32 @@ if MODE==2
     end
     
 end
+
+function [ reducedMat ] = doPCAreduction( dataMat, pcaCoeff, dimension )
+%DOPCA 이 함수의 요약 설명 위치
+%   자세한 설명 위치
+pcaCoeff=pcaCoeff(:,1:dimension);
+reducedMat=dataMat*pcaCoeff;
+end
+
+function [ reduceMat ] = reduceattrib2bootattrib( inputTest, attribList )
+%REDUCETEST 이 함수의 요약 설명 위치
+%   자세한 설명 위치
+[numData, numAttrib]=size(inputTest);
+reduceMat=inputTest;
+k=1;
+for i=1:numAttrib
+    rN=attribList(1,k);
+    if (numAttrib+1-i)~=rN
+        reduceMat(:, numAttrib+1-i)=[];
+    else
+        k=k+1;
+    end
+    if k==21
+        k=1;
+    end
+end
+end
+
+
+

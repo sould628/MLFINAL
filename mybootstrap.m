@@ -1,7 +1,7 @@
 function sample = mybootstrap( inputData, inputPrice, inputLabel, numSamples )
 %BOOT 이 함수의 요약 설명 위치
 %   자세한 설명 위치
-    sample=cell(numSamples, 3);
+    sample=cell(numSamples, 4);
 
     [numData, numAttrib]=size(inputData);
     for j=1:numSamples
@@ -33,6 +33,7 @@ function sample = mybootstrap( inputData, inputPrice, inputLabel, numSamples )
         sample{j,1}=sD;
         sample{j,2}=sP;
         sample{j,3}=sL;
+        sample{j,4}=randomAttrib;
     end
 
 end
