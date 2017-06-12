@@ -6,7 +6,7 @@ classdef AMES
         dataMatrix, dataMatrixzc, compressedMat
         discrete, ordinal, nominal, continuous
         salePrice, salePriceB
-        zeroList
+        zeroList, varList
     end
     properties
         rawR
@@ -284,18 +284,21 @@ classdef AMES
         function zeroList=findzeros(obj)
             zeroList=any(obj.dataMatrixzc);
         end
-        function [dataMatrix, compressedMat]=postProcess(obj, zeroList)
+        function [dataMatrix, dataVariable]=postProcess(obj, zeroList)
+            dataVariable=[];
             numCol=size(zeroList, 2);
             dataMatrix=obj.dataMatrixzc;
             i=1;
             j=1;
             while i<=numCol
+                varname=obj.data.Properties.VariableNames(i);
                 if zeroList(1, i)==0
                     dataMatrix(:, j)=[];
                     i=i+1;
                 else
                     i=i+1;
-                    j=j+1;
+                    j=j+1;                   
+                    dataVariable=[dataVariable; varname];
                 end
             end
         end
@@ -305,8 +308,6 @@ classdef AMES
             maxVec=max(compressedMat);
             minVec=min(compressedMat);
             maxminusminVec=maxVec-minVec;
-            numAttrib=size(maxminusminVec,2);
-            
             compressedMat=(compressedMat-minVec)./maxminusminVec;
             range=2;
             compressedMat=compressedMat.*range-1;

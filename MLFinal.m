@@ -2,14 +2,17 @@ filename='ml_project_train.csv';
 %%Constant Variables
 PCADIMENSION=40;
 NUMKFOLDS=10;
-NUMBOOTSAMPLE=1000;
+NUMBOOTSAMPLE=100;
 
 %%Initialize
 if initialize==true
+    MODE=1;
+    testfile='mytest.csv';
     dataprocess=1;
     dimreduction=1;
     kfold=1;
     doKnn=true;
+    doKnnEnsemble=true;
     doTree=false;
     initialize=0;
 end
@@ -17,14 +20,14 @@ end
 %% DataProcessing
 if dataprocess==true
     %%%ImportData
-    rawData=importfile(filename);
-    rawTest=importfile(testfile);
+    %rawData=importfile(filename);
+    %rawTest=importfile(testfile);
     %%%ProcessData
-    myData=AMES(rawData);
-    myData.dataMatrix=myData.postProcess(myData.zeroList);
+    %myData=AMES(rawData);
+    [myData.dataMatrix, myData.varList]=myData.postProcess(myData.zeroList);
     myData.compressedMat=myData.standardize;
     myTest=AMES(rawTest);
-    myTest.dataMatrix=myTest.postProcess(myData.zeroList);
+    [myTest.dataMatrix, myTest.varList]=myTest.postProcess(myData.zeroList);
     myTest.compressedMat=myTest.standardize;
     dataprocess=0;
 end
@@ -48,7 +51,7 @@ end
 if kfold==true
     disp("Making K-Fold Cross-Validation Set kfold_part");
     drawnow;
-    kfold_part={};
+    kfold_part=cell(NUMKFOLDS, 6);
     bootSample=cell(NUMKFOLDS, 1);
     numData_in_partition=size(compressedMat,1)/NUMKFOLDS;
     for i=1:NUMKFOLDS
@@ -133,9 +136,13 @@ if MODE==1
             myknnDR{i,1}.showResult;
         end
         averagePrecision=averagePrecision/NUMKFOLDS
-        averagePrecisionDR=averagePrecisionDR/NUMKFOLDS
-        
+        averagePrecisionDR=averagePrecisionDR/NUMKFOLDS    
     end
+    if doKnnEnsemble==true
+        for i=1:NUM
+        end
+    end
+    
     %tree classifier
     if doTree==true
         disp("doing tree classifier");
@@ -158,8 +165,8 @@ if MODE==2
     %remove zeros from
     
     zeroList=myTest.zeroList&myData.zeroList;
-    myTest.dataMatrix=myTest.postProcess(zeroList);
-    myData.dataMatrix=myData.postProcess(zeroList);
+    [myTest.dataMatrix, myTest.varList]=myTest.postProcess(zeroList);
+    [myData.dataMatrix, myTest.varList]=myData.postProcess(zeroList);
     compressedTest=myTest.standardize;
     compressedMat=myData.standardize;
     %compressedTest=myTest.compressedMat;
