@@ -303,11 +303,18 @@ classdef AMES
             end
         end
         function compressedMat=standardize(obj)
+            numAttrib=size(obj.dataMatrix,2);
             meanVec=mean(obj.dataMatrix);
+            %compressedMat=obj.dataMatrix;
             compressedMat=obj.dataMatrix-meanVec;
             maxVec=max(compressedMat);
             minVec=min(compressedMat);
             maxminusminVec=maxVec-minVec;
+            for i=1:numAttrib
+                if maxminusminVec(1,i)==0
+                    maxminusminVec(1,i)=1;
+                end
+            end
             compressedMat=(compressedMat-minVec)./maxminusminVec;
             range=2;
             compressedMat=compressedMat.*range-1;

@@ -14,7 +14,7 @@ classdef myKnnClassifier
         function obj=myKnnClassifier(trainingdata, trainingPrice, traininglabel, testdata, testPrice, testlabel, k)
             [trainingrow trainingcol]=size(trainingdata);
             [testrow testcol]=size(testdata);
-            obj.classfierResult=zeros(testrow, 1);
+            obj.classifierResult=zeros(testrow, 1);
             testTranspose=transpose(testdata);
             for i=1:testrow
                 nearestNeighbor(1:k, 1:4)=10000;
@@ -26,7 +26,7 @@ classdef myKnnClassifier
                     end
                 end
                 modeval=mode(nearestNeighbor);
-                obj.classfierResult(i, 1)=modeval(1,4);
+                obj.classifierResult(i, 1)=modeval(1,4);
                 meaneval=mean(nearestNeighbor);
                 obj.regressionResult(i,1)=meaneval(1,3);
             end
@@ -39,7 +39,7 @@ classdef myKnnClassifier
             obj.regressionMAD=mean(abs(predmreal));
             numCorrect=0;
             for i=1:testrow
-                if obj.classfierResult(i,1)==testlabel(i,1)
+                if obj.classifierResult(i,1)==testlabel(i,1)
                     numCorrect=numCorrect+1;
                 end
             end
@@ -52,7 +52,6 @@ classdef myKnnClassifier
             fprintf("Mean Absolute Deviation: %d\n", obj.regressionMAD);
             fprintf("Mean Square Error: %d\n", obj.regressionMSE);
             
-            fprintf("Binary Classifier Precision: %d\n\n", obj.classifierPrecision);
             drawnow;
         end
     end

@@ -3,7 +3,7 @@ filename='../../data/ml_project_train.csv';
 PCADIMENSION=40;
 NUMKFOLDS=10;
 NUMBOOTSAMPLE=100;
-%initialize=true;
+initialize=true;
 %%Initialize
 if initialize==true
     MODE=1;
@@ -95,8 +95,6 @@ if MODE==1
             kfold_part{i,4}=testd;
             kfold_part{i,5}=testp;
             kfold_part{i,6}=testl;
-            %make BootStrap
-            bootSample{i,1}=mybootstrap(trainingd, trainingp, trainingl, NUMBOOTSAMPLE);
         end
         kfold=0;
     end
@@ -117,45 +115,17 @@ if MODE==1
             reducedTestSet=doPCAreduction(kfold_part{i,4}, pcaCoeff, PCADIMENSION);
             myknnDR{i,1}=myKnnClassifier(reducedTrainSet, kfold_part{i,2}, kfold_part{i,3}, reducedTestSet, kfold_part{i,5}, kfold_part{i,6}, 5);
         end
-    end
-    if doKnnEnsemble==true
-        forestResult=zeros(numData_in_partition, NUMKFOLDS);
-        precisionWithBootSample=zeros(1,NUMKFOLDS);
         for i=1:NUMKFOLDS
-            forest=zeros(numData_in_partition, NUMBOOTSAMPLE);
-            for j=1:NUMBOOTSAMPLE
-                if(rem((j/NUMBOOTSAMPLE),0.1)==0)
-                    bootsampleprocess=i+j/NUMBOOTSAMPLE
-                end
-                reduceTest=reduceattrib2bootattrib(kfold_part{i,4}, bootSample{i,1}{j,4});
-                result=myKnnClassifier(bootSample{i,1}{j,1}, bootSample{i,1}{j,2}, bootSample{i,1}{j,3}, reduceTest, kfold_part{i,5}, kfold_part{i,6},5);
-                forest(:,j)=result.classifierResult;
-            end
-            forestResult(:,i)=mode(forest,2);
-            %Validate
-            numCorrect=0;
-            for j=1:numData_in_partition
-                if forestResult(j,i)==kfold_part{i,6}(j,1)
-                    numCorrect=numCorrect+1;
-                end
-            end
-            precisionWithBootSample(1,i)=numCorrect/numData_in_partition;
+            disp("Result of")
+            validationset = i
+            disp("Naive")
+            myknn{i,1}.showResult;
+            disp("Dimension Reduced")
+            myknnDR{i,1}.showResult;
         end
-        averagePrecision=0;
-        averagePrecisionDR=0;
-        precisionMat=zeros(1, NUMKFOLDS);
-        precisionDRMat=zeros(1, NUMKFOLDS);
-        for i=1:NUMKFOLDS
-            precisionMat(1, i)=+myknn{i,1}.classifierPrecision;
-            precisionDRMat(1, i)=averagePrecisionDR+myknnDR{i,1}.classifierPrecision;
-        end
-        average_precision=mean(precisionMat)
-        std_deviation_of_precision=std(precisionMat)
-        average_precision_with_dim_reduction=mean(precisionDRMat)
-        std_deviation_of_precisions_with_dimension_reduction=std(precisionDRMat)
-        average_precision_with_ensemble=mean(precisionWithBootSample)
-        std_deviation_of_precisions_with_ensemble=std(precisionWithBootSample)
+        
     end
+    
     
     %tree classifier
     if doTree==true
@@ -165,6 +135,7 @@ if MODE==1
         tc.getEntropy(1);
         disp("stop");
     end
+
     
     if false
         rawData.Properties.VariableNames(2)
@@ -203,33 +174,11 @@ if MODE==2
         reducedTestSet=doPCAreduction(compressedTest, pcaCoeff, PCADIMENSION);
         myknnDRwTD=myKnnClassifier(reducedTrainSet, dataPrice, dataLabel, reducedTestSet, testPrice, testLabel, 5);
         
-        %myknnwTD.showResult;
-        %myknnDRwTD.showResult;
+        myknnwTD.showResult;
+        myknnDRwTD.showResult;
     end
-    if doKnnEnsemble==true
-        numTestData=size(compressedTest, 1);
-        forest=zeros(numTestData, NUMBOOTSAMPLE);
-        for j=1:NUMBOOTSAMPLE
-            if(rem((j/NUMBOOTSAMPLE),0.1)==0)
-                bootsampleprocess=j/NUMBOOTSAMPLE
-            end
-            reduceTest=reduceattrib2bootattrib(compressedTest, bootSamplewTD{j,4});
-            result=myKnnClassifier(bootSamplewTD{j,1}, bootSamplewTD{j,2}, bootSamplewTD{j,3}, reduceTest, testPrice, testLabel,5);
-            forest(:,j)=result.classifierResult;
-        end
-        forestResult=mode(forest,2);
-        %Validate
-        numCorrect=0;
-        for j=1:numTestData
-            if forestResult(j,1)==testLabel(j,1)
-                numCorrect=numCorrect+1;
-            end
-        end
-        precisionWithBootSamplewTD=numCorrect/numTestData;
-    end
-    average_precision_with_test_data=mean(myknnwTD.classifierPrecision)
-    average_precision_with_dim_reduction_with_test_data=mean(myknnDRwTD.classifierPrecision)
-    average_precision_with_ensemble_with_test_data=mean(precisionWithBootSamplewTD)
+
+
     
 end
 
