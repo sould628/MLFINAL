@@ -1,20 +1,30 @@
-%RawTable = importfile('ml_project_train.csv');
-%RawParams = table2array(RawTable(:, [4, 5, 18, 19, 20, 21 27, 39, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 55]));
-%RawPrices = table2array(RawTable(:, size(RawTable, 2)));
+rawData = importfile('../../data/ml_project_train.csv');
+myData = AMES(rawData);
+myData.dataMatrix = myData.postProcess(myData.zeroList);
 
-% rawData = importfile('ml_project_train.csv');
-% myData = AMES(rawData);
-% myData.dataMatrix = myData.postProcess(myData.zeroList);
+useAdditionalTestData = false;
+additionalTestDataFile = '../../data/ml_project_test.csv';
+ensembleLearning = false;
 
-%RawParams = myData.dataMatrix;
+MajorParamsIndices = [2 3 7 8 10 11 16 17 19 20 22 23 24 26 27 28 30 32 40 41 43 44 45 47 49 52 54 59 62 63 65 67 73 75 79 88 92 95 97 98 99 104 105 108 109 116 118 119 130 131 135 140 143 144 145 150 151 154 159 161 171 172 173 174 175 180 183 186 189 190 193 194 195];
+
 RawParams = myData.dataMatrix(:,MajorParamsIndices);
 RawPrices = myData.salePrice;
-
+    
 RawLabels = RawPrices >= 160000;
 
 minParams = min(RawParams);
 maxParams = max(RawParams);
 scaleParams = maxParams - minParams;
+
+if ensembleLearning
+    rawDataEns = importfile('../../data/ml_project_train_ensemble.csv');
+    myDataEns = AMES(rawDataEns);
+    myDataEns.dataMatrix = myData.postProcess(myData.zeroList);
+
+    RawParams = myDataEns.dataMatrix(:,MajorParamsIndices);
+    RawPrices = myDataEns.salePrice;
+end
 
 learningRate = 0.1;
 
@@ -26,18 +36,30 @@ numOutputNodes = 1;
 numNodesPerLayer = [numInputNodes numHiddenNodes numOutputNodes];
 numLayers = length(numHiddenNodes) + 2;
 
-K = 5;
-foldSize = floor(numAllSamples/K);
-foldIndex = 2;
-testStartIndex = 1 + (foldIndex-1) * foldSize;
-testEndIndex = testStartIndex + (foldSize-1);
+if useAdditionalTestData
+    rawTest = importfile(additionalTestDataFile);
+    myTest = AMES(rawTest);
+    myTest.dataMatrix = myTest.postProcess(myData.zeroList);
+    
+    TrainingParams = RawParams;
+    TrainingLabels = RawLabels;
+    
+    TestParams = myTest.dataMatrix(:,MajorParamsIndices);
+    TestLabels = myTest.salePrice >= 160000;
+else
+    K = 5;
+    foldSize = floor(numAllSamples/K);
+    foldIndex = 5;
+    testStartIndex = 1 + (foldIndex-1) * foldSize;
+    testEndIndex = testStartIndex + (foldSize-1);
 
-TrainingParams = RawParams([1:(testStartIndex-1) (testEndIndex+1):end], :);
-TrainingLabels = RawLabels([1:(testStartIndex-1) (testEndIndex+1):end], :);
-numTrainingSamples = size(TrainingParams, 1);
+    TrainingParams = RawParams([1:(testStartIndex-1) (testEndIndex+1):end], :);
+    TrainingLabels = RawLabels([1:(testStartIndex-1) (testEndIndex+1):end], :);
+    numTrainingSamples = size(TrainingParams, 1);
 
-TestParams = RawParams(testStartIndex:testEndIndex, :);
-TestLabels = RawLabels(testStartIndex:testEndIndex, :);
+    TestParams = RawParams(testStartIndex:testEndIndex, :);
+    TestLabels = RawLabels(testStartIndex:testEndIndex, :);
+end
 
 TrainingParamsN = (TrainingParams-minParams)./scaleParams;
 TestParamsN = (TestParams-minParams)./scaleParams;
@@ -86,8 +108,6 @@ for epoch = 1: numEpochIterations
         
         % BP
         A{1} = TrainingParamsN(s, :);
-        %D{numLayers} = ActivationFuncDerivative(TargetValues(s) - B{numLayers}, true);
-        %D{numLayers} = sign(ActivationFuncDerivative(TargetValues(s) - B{numLayers}, true));
         D{numLayers} = ActivationFuncDerivative(A{numLayers});
         if B{numLayers} < TrainingLabels(s)
             D{numLayers} = -D{numLayers};
@@ -134,6 +154,11 @@ for epoch = 1: numEpochIterations
     hold off;    
     
     pause(0);
+end
+
+if ensembleLearning
+    WeightsSet{foldIndex} = Weights;
+    BiasesSet{foldIndex} = Biases;
 end
 
 function fx = ActivationFunc(x, linear)
