@@ -3,7 +3,7 @@ filename='../../data/ml_project_train.csv';
 PCADIMENSION=40;
 NUMKFOLDS=10;
 NUMBOOTSAMPLE=100;
-initialize=true;
+%initialize=true;
 %%Initialize
 if initialize==true
     MODE=1;
@@ -116,11 +116,11 @@ if MODE==1
             myknnDR{i,1}=myKnnClassifier(reducedTrainSet, kfold_part{i,2}, kfold_part{i,3}, reducedTestSet, kfold_part{i,5}, kfold_part{i,6}, 5);
         end
         for i=1:NUMKFOLDS
-            disp("Result of")
             validationset = i
-            disp("Naive")
+            disp("Naive");
             myknn{i,1}.showResult;
-            disp("Dimension Reduced")
+            disp(" ");
+            disp("Dimension Reduced");
             myknnDR{i,1}.showResult;
         end
         
@@ -174,7 +174,10 @@ if MODE==2
         reducedTestSet=doPCAreduction(compressedTest, pcaCoeff, PCADIMENSION);
         myknnDRwTD=myKnnClassifier(reducedTrainSet, dataPrice, dataLabel, reducedTestSet, testPrice, testLabel, 5);
         
+        disp("Naive");
         myknnwTD.showResult;
+        disp(" ");
+        disp("Dimension Reduction");
         myknnDRwTD.showResult;
     end
 

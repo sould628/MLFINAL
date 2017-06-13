@@ -191,7 +191,7 @@ if MODE==2
     testPrice=myTest.salePrice;
     disp("Making Bootstrap")
     drawnow;
-    %bootSamplewTD=mybootstrap(compressedMat, dataPrice, dataLabel, NUMBOOTSAMPLE);
+    bootSamplewTD=mybootstrap(compressedMat, dataPrice, dataLabel, NUMBOOTSAMPLE);
     %%%knn
     if doKnn==true
         disp("Processing knn with external test data");
